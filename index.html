@@ -1,10 +1,360 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Simple Page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cleveland Security Cameras Simulator</title>
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
+        body{background:#1a1a1a;color:#fff;padding:20px}
+        .csc-drawing-header{text-align:center;margin:20px 0;font-size:1.2em}
+        .csc-drawing-header a{color:#00ff00;text-decoration:none}
+        .csc-drawing-header a:hover{color:#00cc00}
+        .csc-drawing-button-row{display:flex;justify-content:center;max-width:1200px;margin:60px auto 20px;padding:0 20px}
+        .csc-drawing-toggle-button{width:100%;padding:18px 30px;background:#000;border:2px solid #00ff00;border-radius:10px;color:#fff;font-size:2.4em;font-weight:700;cursor:pointer;text-align:center}
+        .csc-drawing-toggle-button:hover{background:#00ff00;color:#000}
+        .csc-drawing-container{background:#1a1a1a;border-radius:15px;padding:30px;max-width:1250px;margin:20px auto;display:none;color:#fff;overflow-x:auto}
+        .csc-drawing-container h2{text-align:center;color:#00ff00;margin-bottom:20px;font-size:1.8em}
+        .csc-drawing-container label{display:block;margin:10px 0 5px;color:#fff}
+        .csc-drawing-container input,.csc-drawing-container select{width:100%;padding:12px;border:1px solid #00ff00;border-radius:8px;background:#333;color:#fff;font-size:1em}
+        .csc-drawing-error{color:#ff4444;font-size:.85em;margin-bottom:5px;display:none}
+        .csc-drawing-button-group{display:flex;gap:8px;margin-bottom:15px}
+        .csc-drawing-action-button{flex:1;padding:10px;background:#00ff00;border:none;border-radius:8px;color:#000;font-size:1em;font-weight:700;cursor:pointer}
+        .csc-drawing-action-button:hover{background:#00cc00}
+        .csc-drawing-table{width:100%;border-collapse:collapse;margin:15px 0;background:#333;border-radius:8px}
+        .csc-drawing-table th,.csc-drawing-table td{padding:10px;border:1px solid #00ff00;color:#fff;font-size:.9em}
+        .csc-drawing-table th{background:#00ff00;color:#000}
+        .csc-drawing-canvas{display:block;margin:10px auto;border:1px solid #00ff00;border-radius:8px}
+        .csc-drawing-footer{text-align:center;margin:20px 0;font-size:1.2em}
+        .csc-drawing-footer a{color:#00ff00;text-decoration:none}
+        .csc-drawing-footer a:hover{color:#00cc00}
+        @media (max-width:480px){
+            .csc-drawing-header,.csc-drawing-footer{font-size:1em}
+            .csc-drawing-button-row{margin:40px auto 10px;padding:0 15px}
+            .csc-drawing-toggle-button{font-size:2em;padding:14px 20px}
+            .csc-drawing-container{padding:20px;margin:10px}
+            .csc-drawing-canvas{width:900px;height:900px}
+        }
+        @media print{
+            .csc-drawing-header,.csc-drawing-button-row,.csc-drawing-container form,.csc-drawing-container table,.csc-drawing-container p,.csc-drawing-footer{display:none}
+            .csc-drawing-container{display:block;padding:0}
+            .csc-drawing-canvas{margin:0;border:none}
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to My Simple Page!</h1>
-    <p>This is a simple webpage hosted on GitHub Pages.</p>
+    <div class="csc-drawing-header">
+        <p>Email: <a href="mailto:contact@clevelandsecuritycameras.com">contact@clevelandsecuritycameras.com</a> | Phone: <a href="tel:2163338245">216-333-8245</a></p>
+    </div>
+    <div class="csc-drawing-button-row">
+        <button class="csc-drawing-toggle-button" onclick="cscDrawingToggle()">Cleveland Security Cameras Simulator</button>
+    </div>
+    <div class="csc-drawing-container" id="cscDrawingContainer">
+        <h2>Cleveland Security Cameras Simulator</h2>
+        <form>
+            <label>Width (ft)</label>
+            <input type="number" id="cscDrawingWidth" min="10" value="100">
+            <p class="csc-drawing-error" id="cscDrawingWidthError">Enter 10 ft or more</p>
+            <label>Length (ft)</label>
+            <input type="number" id="cscDrawingLength" min="10" value="50">
+            <p class="csc-drawing-error" id="cscDrawingLengthError">Enter 10 ft or more</p>
+            <label>Camera Type</label>
+            <select id="cscDrawingCameraType">
+                <option value="entry">Entry</option>
+                <option value="perimeter">Perimeter</option>
+                <option value="general">General</option>
+            </select>
+            <div class="csc-drawing-button-group">
+                <button type="button" class="csc-drawing-action-button" onclick="cscDrawingAddCamera()">Add Camera</button>
+                <button type="button" class="csc-drawing-action-button" onclick="cscDrawingAddDoor()">Add Door</button>
+                <button type="button" class="csc-drawing-action-button" onclick="cscDrawingAddWindow()">Add Window</button>
+                <button type="button" class="csc-drawing-action-button" onclick="cscDrawingRemove()">Remove</button>
+                <button type="button" class="csc-drawing-action-button" onclick="cscDrawingSaveImage()">Save Image</button>
+                <button type="button" class="csc-drawing-action-button" onclick="cscDrawingPrint()">Print</button>
+            </div>
+            <table class="csc-drawing-table">
+                <thead><tr><th>Element</th><th>Type</th><th>Position</th><th>Details</th></tr></thead>
+                <tbody id="cscDrawingTableBody"></tbody>
+            </table>
+            <canvas id="cscDrawingCanvas" class="csc-drawing-canvas" width="1200" height="1200"></canvas>
+        </form>
+        <p style="text-align:center;margin-top:15px">
+            <a href="https://clevelandsecuritycameras.com/contact" style="color:#00ff00;text-decoration:none">Contact us!</a>
+        </p>
+    </div>
+    <div class="csc-drawing-footer">
+        <p>Email: <a href="mailto:contact@clevelandsecuritycameras.com">contact@clevelandsecuritycameras.com</a> | Phone: <a href="tel:2163338245">216-333-8245</a></p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("cscDrawingCanvas"), ctx = canvas.getContext("2d");
+        let cameras = [], doors = [], windows = [], selected = { type: null, index: null }, dragging = { type: null, index: null, mode: null }, scale = 1, rectW = 1050, rectH = 525;
+        const colors = ["red", "blue", "yellow", "green", "purple", "orange", "cyan", "magenta", "pink", "lime"];
+
+        function validateInput() {
+            const w = document.getElementById("cscDrawingWidth"), l = document.getElementById("cscDrawingLength"),
+                  we = document.getElementById("cscDrawingWidthError"), le = document.getElementById("cscDrawingLengthError"),
+                  wv = parseInt(w.value), lv = parseInt(l.value);
+            we.style.display = wv < 10 ? "block" : "none";
+            le.style.display = lv < 10 ? "block" : "none";
+            return wv >= 10 && lv >= 10;
+        }
+
+        function updateCanvas() {
+            if (!validateInput()) return;
+            const w = parseInt(document.getElementById("cscDrawingWidth").value) || 100,
+                  l = parseInt(document.getElementById("cscDrawingLength").value) || 50;
+            scale = Math.min(1050 / w, 1050 / l);
+            rectW = w * scale;
+            rectH = l * scale;
+            cameras = cameras.map(c => ({ ...c, x: Math.max(10, Math.min(1190, c.x)), y: Math.max(10, Math.min(1190, c.y)) }));
+            doors = doors.map(d => ({ ...d, x: Math.max(10, Math.min(1190, d.x)), y: Math.max(10, Math.min(1190, d.y)) }));
+            windows = windows.map(w => ({ ...w, x: Math.max(10, Math.min(1190, w.x)), y: Math.max(10, Math.min(1190, w.y)) }));
+        }
+
+        function draw() {
+            updateCanvas();
+            ctx.clearRect(0, 0, 1200, 1200);
+            ctx.fillStyle = "#fff";
+            ctx.fillRect(0, 0, 1200, 1200);
+            const x = Math.max(75, (1200 - rectW) / 2), y = Math.max(75, (1200 - rectH) / 2),
+                  w = parseInt(document.getElementById("cscDrawingWidth").value) || 100,
+                  l = parseInt(document.getElementById("cscDrawingLength").value) || 50;
+            ctx.strokeStyle = "#000";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, rectW, rectH);
+            ctx.fillStyle = "#000";
+            ctx.font = "16px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText(`${w} ft`, x + rectW / 2, y - 10);
+            ctx.textAlign = "left";
+            ctx.fillText(`${l} ft`, x - 50, y + rectH / 2);
+            doors.forEach((d, i) => {
+                if (i === selected.index && selected.type === "door") {
+                    ctx.strokeStyle = "yellow";
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(d.x - 27, d.y - 52, 54, 104);
+                }
+                ctx.fillStyle = "brown";
+                ctx.fillRect(d.x - 25, d.y - 50, 50, 100);
+                ctx.fillStyle = "#fff";
+                ctx.beginPath();
+                ctx.arc(d.x + 10, d.y, 15, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.strokeStyle = "#000";
+            });
+            windows.forEach((w, i) => {
+                if (i === selected.index && selected.type === "window") {
+                    ctx.strokeStyle = "yellow";
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(w.x - 52, w.y - 27, 104, 54);
+                }
+                ctx.fillStyle = "blue";
+                ctx.fillRect(w.x - 50, w.y - 25, 100, 50);
+                ctx.strokeStyle = "#fff";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(w.x, w.y - 25);
+                ctx.lineTo(w.x, w.y + 25);
+                ctx.moveTo(w.x - 50, w.y);
+                ctx.lineTo(w.x + 50, w.y);
+                ctx.stroke();
+                ctx.strokeStyle = "#000";
+            });
+            cameras.forEach((c, i) => {
+                const a = c.angle * Math.PI / 180, s = a - c.fov * Math.PI / 360, e = a + c.fov * Math.PI / 360;
+                if (i === selected.index && selected.type === "camera") {
+                    ctx.strokeStyle = "yellow";
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(c.x, c.y, 12, 0, 2 * Math.PI);
+                    ctx.stroke();
+                }
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.globalAlpha = 0.3;
+                ctx.beginPath();
+                ctx.moveTo(c.x, c.y);
+                ctx.arc(c.x, c.y, 25 * scale, s, e);
+                ctx.closePath();
+                ctx.fill();
+                ctx.globalAlpha = 1;
+                ctx.fillStyle = "#00ff00";
+                ctx.fillRect(c.x - 6, c.y - 4, 12, 8);
+                ctx.fillStyle = "#fff";
+                ctx.beginPath();
+                ctx.arc(c.x + 2, c.y, 4, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.font = "12px Arial";
+                ctx.textAlign = "center";
+                ctx.fillText(c.label, c.x, c.y - 15);
+                ctx.strokeStyle = "#000";
+            });
+        }
+
+        function cscDrawingAddCamera() {
+            if (cameras.length >= 10) return alert("Max 10 cameras");
+            if (!validateInput()) return;
+            const x = Math.random() * 1180 + 10, y = Math.random() * 1180 + 10,
+                  t = document.getElementById("cscDrawingCameraType").value,
+                  c = { x, y, type: t, label: t.charAt(0).toUpperCase() + (cameras.filter(c => c.type === t).length + 1), fov: 45, angle: 0 };
+            cameras.push(c);
+            updateTable();
+            draw();
+        }
+
+        function cscDrawingAddDoor() {
+            if (doors.length >= 10) return alert("Max 10 doors");
+            if (!validateInput()) return;
+            const x = Math.random() * 1180 + 10, y = Math.random() * 1180 + 10;
+            doors.push({ x, y });
+            updateTable();
+            draw();
+        }
+
+        function cscDrawingAddWindow() {
+            if (windows.length >= 10) return alert("Max 10 windows");
+            if (!validateInput()) return;
+            const x = Math.random() * 1180 + 10, y = Math.random() * 1180 + 10;
+            windows.push({ x, y });
+            updateTable();
+            draw();
+        }
+
+        function cscDrawingRemove() {
+            if (selected.type === "camera") cameras.splice(selected.index, 1);
+            else if (selected.type === "door") doors.splice(selected.index, 1);
+            else if (selected.type === "window") windows.splice(selected.index, 1);
+            selected = { type: null, index: null };
+            dragging = { type: null, index: null, mode: null };
+            updateTable();
+            draw();
+        }
+
+        function cscDrawingSaveImage() {
+            const a = document.createElement("a");
+            a.href = canvas.toDataURL("image/png");
+            a.download = "cctv_layout.png";
+            a.click();
+        }
+
+        function cscDrawingPrint() {
+            window.print();
+        }
+
+        function updateTable() {
+            const t = [
+                ...cameras.map((c, i) => ({ l: c.label, t: c.type.charAt(0).toUpperCase() + c.type.slice(1), p: `(${Math.round(c.x)},${Math.round(c.y)})`, d: `${Math.round(c.angle)}°` })),
+                ...doors.map((d, i) => ({ l: `D${i + 1}`, t: "Door", p: `(${Math.round(d.x)},${Math.round(d.y)})`, d: "" })),
+                ...windows.map((w, i) => ({ l: `W${i + 1}`, t: "Window", p: `(${Math.round(w.x)},${Math.round(w.y)})`, d: "" }))
+            ];
+            document.getElementById("cscDrawingTableBody").innerHTML = t.map(e => `<tr><td>${e.l}</td><td>${e.t}</td><td>${e.p}</td><td>${e.d}</td></tr>`).join("");
+        }
+
+        function getElement(x, y) {
+            for (let i = 0; i < cameras.length; i++) {
+                let c = cameras[i], dx = x - c.x, dy = y - c.y,
+                    dist = Math.sqrt(dx * dx + dy * dy),
+                    angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                if (angle < 0) angle += 360;
+                let angleDiff = Math.abs(angle - c.angle);
+                if (angleDiff > 180) angleDiff = 360 - angleDiff;
+                if (dist <= 25 * scale && angleDiff <= c.fov / 2) return { type: "camera", index: i, mode: "rotate" };
+                if (dist < 15) return { type: "camera", index: i, mode: "drag" };
+            }
+            for (let i = 0; i < doors.length; i++) {
+                let d = doors[i], dx = x - d.x, dy = y - d.y;
+                if (Math.sqrt(dx * dx + dy * dy) < 50) return { type: "door", index: i, mode: "drag" };
+            }
+            for (let i = 0; i < windows.length; i++) {
+                let w = windows[i], dx = x - w.x, dy = y - w.y;
+                if (Math.sqrt(dx * dx + dy * dy) < 50) return { type: "window", index: i, mode: "drag" };
+            }
+            return null;
+        }
+
+        canvas.addEventListener("mousedown", e => {
+            let r = canvas.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, elem = getElement(x, y);
+            if (elem) {
+                selected = { type: elem.type, index: elem.index };
+                dragging = elem;
+                draw();
+            } else {
+                selected = { type: null, index: null };
+                dragging = { type: null, index: null, mode: null };
+            }
+        });
+
+        canvas.addEventListener("mousemove", e => {
+            if (dragging.type) {
+                let r = canvas.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+                let t = dragging.type, i = dragging.index;
+                if (t === "camera" && dragging.mode === "rotate") {
+                    let c = cameras[i], angle = Math.atan2(y - c.y, x - c.x) * 180 / Math.PI;
+                    if (angle < 0) angle += 360;
+                    cameras[i] = { ...c, angle };
+                    updateTable();
+                } else {
+                    x = Math.max(10, Math.min(1190, x));
+                    y = Math.max(10, Math.min(1190, y));
+                    if (t === "camera") cameras[i] = { ...cameras[i], x, y };
+                    else if (t === "door") doors[i] = { ...doors[i], x, y };
+                    else windows[i] = { ...windows[i], x, y };
+                }
+                draw();
+            }
+        });
+
+        canvas.addEventListener("mouseup", () => { dragging = { type: null, index: null, mode: null }; });
+
+        canvas.addEventListener("touchstart", e => {
+            e.preventDefault();
+            let r = canvas.getBoundingClientRect(), x = e.touches[0].clientX - r.left, y = e.touches[0].clientY - r.top, elem = getElement(x, y);
+            if (elem) {
+                selected = { type: elem.type, index: elem.index };
+                dragging = elem;
+                draw();
+            } else {
+                selected = { type: null, index: null };
+                dragging = { type: null, index: null, mode: null };
+            }
+        });
+
+        canvas.addEventListener("touchmove", e => {
+            e.preventDefault();
+            if (dragging.type) {
+                let r = canvas.getBoundingClientRect(), x = e.touches[0].clientX - r.left, y = e.touches[0].clientY - r.top;
+                let t = dragging.type, i = dragging.index;
+                if (t === "camera" && dragging.mode === "rotate") {
+                    let c = cameras[i], angle = Math.atan2(y - c.y, x - c.x) * 180 / Math.PI;
+                    if (angle < 0) angle += 360;
+                    cameras[i] = { ...c, angle };
+                    updateTable();
+                } else {
+                    x = Math.max(10, Math.min(1190, x));
+                    y = Math.max(10, Math.min(1190, y));
+                    x = Math.max(10, Math.min(1190, x));
+                    y = Math.max(10, Math.min(1190, y));
+                    if (t === "camera") cameras[i] = { ...cameras[i], x, y };
+                    else if (t === "door") doors[i] = { ...doors[i], x, y };
+                    else windows[i] = { ...windows[i], x, y };
+                }
+                draw();
+            }
+        });
+
+        canvas.addEventListener("touchend", () => { dragging = { type: null, index: null, mode: null }; });
+
+        document.getElementById("cscDrawingWidth").addEventListener("input", draw);
+        document.getElementById("cscDrawingLength").addEventListener("input", draw);
+
+        function cscDrawingToggle() {
+            const c = document.getElementById("cscDrawingContainer"), b = document.querySelector(".csc-drawing-toggle-button");
+            c.style.display = c.style.display === "block" ? "none" : "block";
+            b.textContent = c.style.display === "block" ? "Done" : "Cleveland Security Cameras Simulator";
+            draw();
+        }
+
+        draw();
+    </script>
 </body>
 </html>
